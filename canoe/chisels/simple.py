@@ -1,16 +1,12 @@
 import re
 
 
-class WordsFilter(object):
+class RegexpFilter(object):
     
-    def __init__(self, words, invert=False):
-        if not hasattr(words, '__iter__'):
-            esc = map(re.escape, words)
-            self._re = re.compile('(%s)' % '|'.join(esc))
-        else:
-            self._re = re.compile(words)
+    def __init__(self, regex, invert=False):
         self._invert = invert
-
+        self._re = re.compile(regex)
+        
     def __call__(self, line, buffer):
         found = bool(self._re.search(line))
         if found == self._invert:
@@ -18,10 +14,15 @@ class WordsFilter(object):
         else:
             return (None, None)
 
-
-class RegexpFilter(object):
-    
-    def __init__(self, re, invert=False):
-        self._invert = invert
-        self._re = re.compile(re)
         
+class WordsFilter(RegexpFilter):
+    
+    def __init__(self, words, invert=False):
+        regex = ''
+        if not hasattr(words, '__iter__'):
+            esc = map(re.escape, words)
+            regex = '\b(%s)\b' % '|'.join(esc)
+        else:
+            regex = re.escape(words)
+        RegexpFilter.__init__(self, regex, invert)
+

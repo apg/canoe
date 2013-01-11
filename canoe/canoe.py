@@ -15,6 +15,8 @@ class Canoe(object):
     def send(self, line, buffer):
         for f in self._filters:
             nline, nbuffer = f(line, buffer)
+            if nline is None or nbuff is None:
+                break
 
         if nline != None and buffer != None:
             if self._route:

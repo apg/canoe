@@ -70,7 +70,10 @@ class WatchedFile(object):
 
 
 def start_watch(conf):
-    
+    """Given a config object which may define multiple canoes, run
+    all of them, however that means.
+    """
+    pass
 
 
 if __name__ == '__main__':
