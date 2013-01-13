@@ -1,1 +1,2 @@
-
+class Config(object):
+    watching = []

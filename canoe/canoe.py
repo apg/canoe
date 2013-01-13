@@ -15,10 +15,10 @@ class Canoe(object):
     def send(self, line, buffer):
         for f in self._filters:
             nline, nbuffer = f(line, buffer)
-            if nline is None or nbuff is None:
+            if nline is None or nbuffer is None:
                 break
 
-        if nline != None and buffer != None:
+        if nline != None and nbuffer != None:
             if self._route:
                 return self._route(line, buffer)
 

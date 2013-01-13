@@ -1,10 +1,9 @@
-#!/usr/bin/env python
-
 import os
 import sys
 import time
+import threading
 
-from canoe.data import Buffer                  
+from data import Buffer                  
       
 class WatchedFile(object):
     
@@ -54,7 +53,6 @@ class WatchedFile(object):
 
             if tell > lastTell:
                 self._chunk(a, cb)
-                print a,
 
             lastTell = tell
 
@@ -73,14 +71,21 @@ def start_watch(conf):
     """Given a config object which may define multiple canoes, run
     all of them, however that means.
     """
-    pass
+    def mk_cball(canoes):
+        def cb(line, buffer):
+            for c in canoes:
+                c.send(line, buffer)
+        return cb
 
+    ts = []
 
-if __name__ == '__main__':
-    def cb(line, buf):
-        if line.startswith('root'):
-            print '\x1b[1;34m%s\x1b[0;m' % line
+    for fname, canoes in conf.watching:
+        wf = WatchedFile(fname, 1024) # TODO: should be configured
+        cb = mk_cball(canoes)
+        tid = threading.Thread(target=wf.watch, args=(cb,))
+        ts.append(tid)
+        tid.start()
 
-    if len(sys.argv) > 1:
-        wf = WatchedFile(sys.argv[1])
-        wf.watch(cb)
+    for t in ts:
+        t.join()
+

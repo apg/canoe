@@ -6,10 +6,16 @@ class RegexpFilter(object):
     def __init__(self, regex, invert=False):
         self._invert = invert
         self._re = re.compile(regex)
+        print "init regexp filter", regex
         
     def __call__(self, line, buffer):
+        print "TEST: ", line, self._re.search(line)
         found = bool(self._re.search(line))
-        if found == self._invert:
+        if found and (not self._invert):
+            print "           just lets go have one last look"
+            return (line, buffer)
+        elif self._invert:
+            print "           found due to invert!"
             return (line, buffer)
         else:
             return (None, None)
