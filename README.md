@@ -9,10 +9,10 @@ them in real time. It's an old concept, but a new tool.
 
 ### Canoes
 
-Canoes are the processes created via chisels (filters) that are sent down a 
+Canoes are the processes created via filters (filters) that are sent down a 
 route (actions).
 
-### Chisels
+### Filters
 
 When you think of how you monitor log files it's likely that you sling
 together a huge pipeline of shell commands--something like this
@@ -23,10 +23,10 @@ Which will highlight ERROR and filter out all of the ignored things. It can
 get much more complicated, especially when you try to take into consideration
 multiple lines and context.
 
-In canoe, think of chisels as `grep`. Well, `grep` with an always available
+In canoe, think of filters as `grep`. Well, `grep` with an always available
 `-C <n>`
 
-Chisels can be composed, and should be for complicated tasks. 
+Filters can be composed, and should be for complicated tasks. 
 
 ### Routes
 

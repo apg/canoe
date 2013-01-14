@@ -12,5 +12,5 @@ Chisels can contain state too. The easiest way to do this is to create a
 closure, but if you'd rather think in objects, just override `__call__`.
 """
 
-from canoe.chisels.simple import *
+from canoe.filters.simple import *
 

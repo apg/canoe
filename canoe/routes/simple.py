@@ -5,4 +5,4 @@ class EchoRoute(object):
         self._prefix = prefix or ''
     
     def __call__(self, line, buffer):
-        print prefix, line
+        print "%s%s" % (self._prefix, line)

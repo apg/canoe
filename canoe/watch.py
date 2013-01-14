@@ -40,6 +40,8 @@ class WatchedFile(object):
 
     def watch(self, cb=None):
         # TODO fill the buffer with bufn lines
+        # TODO this doesn't work with unix sockets, 
+        # nor does it work with fifos, since seek doesn't work on them
         self.fd.seek(0, 2)
 
         lastTell = -1

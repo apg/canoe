@@ -1,6 +1,8 @@
 from importlib import import_module
 
-from canoe import Canoe
+from canoe.canoe import Canoe
+from canoe.routes import EchoRoute
+from canoe.filters import PassThroughFilter
 
 # TODO: need to import stuff in here I'm sure!
 
@@ -53,44 +55,40 @@ class DeclNode(Node):
             for a in self.assignments:
                 a.evaluate(kwargs)
 
-        print self.assignments
-        print kwargs
-
-        if self.decl_type == 'chisel':
-            klass = find_chisel(self.path)
-            print klass
+        if self.decl_type == 'filter':
+            klass = find_filter(self.path)
         elif self.decl_type == 'route':
             klass = find_route(self.path)
         else:
             raise ValueError("Don't know what to do with '%s'" % \
                                  self.decl_type)
-
-        # TODO: find and instantiate path with kwargs!
         return klass(**kwargs)
 
 
 class WatchNode(Node):
 
-    def __init__(self, f, chisels=None, route=None):
+    def __init__(self, f, filters=None, route=None):
         self.file = f
-        self.chisels = chisels
+        self.filters = filters
         self.route = route
 
     def evaluate(self, env):
         eroute = None
-        echisels = None
+        efilters = None
         if self.route:
             eroute = self.route.evaluate(env)
+        else:
+            eroute = EchoRoute()
 
-        # TODO: if no chisels, pass everything through.
-        # TODO: if no route, use default Print route    
-        if self.chisels:
-            echisels = [c.evaluate(env) for c in self.chisels]
+        if self.filters:
+            efilters = [c.evaluate(env) for c in self.filters]
+        else:
+            efilters = [PassThroughChisel()]
             
-        canoe = Canoe(echisels, eroute)
+        canoe = Canoe(efilters, eroute)
 
-        # TODO: this isn't quite right, since we can have multiple
-        #  canoes per file
+        # Let someone else deal with the fact that there can be
+        # multiple canoes per file
         return (self.file, [canoe])
 
 
@@ -101,10 +99,11 @@ class ValueNode(Node):
         self.value = value
 
     def evaluate(self, env):
+        if isinstance(self.value, DerefNode):
+            return self.value.evaluate(env)
         return self.value
 
 
-# TODO: derefs are never created from the parser
 class DerefNode(Node):
     
     def __init__(self, identifier):
@@ -117,9 +116,11 @@ class DerefNode(Node):
                             self.identifier)
 
 
-def find_chisel(p):
+# TODO: this is crap, and should definitely be smarter, allow for
+# better pluginy infrastructure, etc
+def find_filter(p):
     if '.' not in p:
-        p = 'canoe.chisels.' + p
+        p = 'canoe.filters.' + p
     return _import_class(p)
 
 def find_route(p):

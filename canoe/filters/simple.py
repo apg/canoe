@@ -1,6 +1,6 @@
 import re
 
-# TODO: shouldn't be the case that chisels are always classes
+# TODO: shouldn't be the case that filters are always classes
 
 class PassThroughFilter(object):
 

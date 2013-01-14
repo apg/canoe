@@ -3,7 +3,7 @@ import ply.lex as lex
 reserved_words = {
     'route': 'ROUTE',
     'watch': 'WATCH',
-    'chisel': 'CHISEL',
+    'filter': 'FILTER',
 }
 
 tokens = [
@@ -32,7 +32,17 @@ def t_NUMBER(t):
     return t
 
 def t_STRING(t):
-    r'".*?"'
+    r'"(\\[nrt"\\]|[^\\\"])*"'
+    replacements = [
+        ('\\n', '\n'),
+        ('\\r', '\r'),
+        ('\\t', '\t'),
+        ('\\"', '"'),
+        ('\\\\', '\\'),
+        ]
+    for s, r in replacements:
+        t.value = t.value.replace(s, r)
+    t.value = t.value[1:-1]
     return t
 
 def t_IMPORT_PATH(t):
@@ -58,7 +68,8 @@ def t_newline(t):
 t_ignore  = ' \t'
 
 def t_error(t):
-    print "Illegal character '%s' on line %d." % (t.value[0], t.lexer.lineno)
+    print "Illegal character '%s' on line %d, position %d." % \
+        (t.value[0], t.lexer.lineno, t.lexer.lexpos)
     raise SystemExit()
 
 # Build the lexer
