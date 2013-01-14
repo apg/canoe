@@ -3,8 +3,11 @@ import re
 
 class RegexpFilter(object):
     
-    def __init__(self, regex, invert=False):
+    def __init__(self, regex=None, invert=False):
         self._invert = invert
+        if not regex:
+            raise ValueError("regex argument can't be blank")
+        print "COMPILING!", regex
         self._re = re.compile(regex)
         print "init regexp filter", regex
         
