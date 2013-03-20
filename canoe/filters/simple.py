@@ -20,7 +20,7 @@ class RegexpFilter(object):
         found = bool(self._re.search(line))
         if found and (not self._invert):
             return (line, buffer)
-        elif self._invert:
+        elif (not found) and self._invert:
             return (line, buffer)
         else:
             return (None, None)
@@ -36,4 +36,3 @@ class WordsFilter(RegexpFilter):
         else:
             regex = re.escape(words)
         RegexpFilter.__init__(self, regex, invert)
-

@@ -42,15 +42,18 @@ class Buffer(object):
     def copyn(self, n):
         """Copies last n items out of the buffer"""
         out = []
+
         if n >= self.n:
             n = self.n
 
-        s = self.start
         i = 0
-        while self.end != s and i < n:
-            out.append(self.els(s))
-            s = (self.start + 1) % self.n
+        e = (self.end - 1) % self.n
+
+        while e != self.start and i < n:
+            out.append(self.els[e]) 
+            e = (e - 1) % self.n
             i += 1
+
+        out.reverse()
         return out
-                  
-      
+
