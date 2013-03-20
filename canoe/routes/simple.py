@@ -61,4 +61,3 @@ class SMTPRoute(object):
             smtp.login(self._smtp_login, self._smtp_password)
             smtp.sendmail(msg['From'], tos, msg.as_string())
             smtp.quit()
-            self._testing = True
