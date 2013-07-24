@@ -7,7 +7,6 @@ from ast import ConfigNode, AssNode, DeclNode, WatchNode, ValueNode, DerefNode
 def p_config(p):
     """config : top_assignments watch_blocks
     """
-    print "Config"
     p[0] = ConfigNode(top_assignments=p[1], watches=p[2])
 
 def p_top_assignments(p):
@@ -37,6 +36,7 @@ def p_watch_block(p):
 
 def p_top_assignment(p):
     """top_assignment : IDENTIFIER EQUALS declaration
+                      | IDENTIFIER EQUALS value
     """
     p[0] = AssNode(identifier=p[1], value=p[3])
 
@@ -57,19 +57,25 @@ def p_filter_declarations(p):
 
 def p_filter_declaration(p):
     """filter_declaration : FILTER path LCURLY assignments RCURLY
+                          | FILTER path
                           | FILTER dereference
     """
-    if len(p) == 3:
+    if len(p) == 3 and p[2].__class__ == DerefNode:
         p[0] = p[2]
+    elif len(p) == 3:
+        p[0] = DeclNode('filter', p[2], [])
     else:
         p[0] = DeclNode('filter', p[2], p[4])
 
 def p_route_declaration(p):
     """route_declaration : ROUTE path LCURLY assignments RCURLY
+                         | ROUTE path
                          | ROUTE dereference
     """
-    if len(p) == 3:
+    if len(p) == 3 and p[2].__class__ == DerefNode:
         p[0] = p[2]
+    elif len(p) == 3:
+        p[0] = DeclNode('route', p[2], [])
     else:
         p[0] = DeclNode('route', p[2], p[4])
 
@@ -114,7 +120,6 @@ def p_dereference(p):
 
 def p_error(p):
     raise SyntaxError("Syntax Error! on line %d" % p.lexer.lineno)
-
 
 parser = yacc.yacc()
 

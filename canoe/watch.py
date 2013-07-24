@@ -3,8 +3,11 @@ import sys
 import time
 import threading
 
+from collections import defaultdict
+
 from data import Buffer                  
       
+
 class WatchedFile(object):
     
     def __init__(self, fname, bufn=0):
@@ -41,7 +44,7 @@ class WatchedFile(object):
     def watch(self, cb=None):
         # TODO fill the buffer with bufn lines
         # TODO this doesn't work with unix sockets, 
-        # nor does it work with fifos, since seek doesn't work on them
+        #  nor does it work with fifos, since seek doesn't work on them
         self.fd.seek(0, 2)
 
         lastTell = -1
@@ -79,15 +82,17 @@ def start_watch(conf):
                 c.send(line, buffer)
         return cb
 
-    ts = []
+    things = defaultdict(list)
 
     for fname, canoes in conf.watching:
-        wf = WatchedFile(fname, 1024) # TODO: should be configured
+        things[fname] += canoes
+
+    for fname, canoes in things.iteritems():
+        wf = WatchedFile(fname, 1024) # TODO: buffer length should be configured
         cb = mk_cball(canoes)
-        tid = threading.Thread(target=wf.watch, args=(cb,))
-        ts.append(tid)
-        tid.start()
+        t = threading.Thread(target=wf.watch, args=(cb,))
+        t.daemon = True
+        t.start()
 
-    for t in ts:
-        t.join()
-
+    while threading.active_count() > 0:
+        time.sleep(.1)

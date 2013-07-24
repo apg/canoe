@@ -1,8 +1,8 @@
 from importlib import import_module
 
 from canoe.canoe import Canoe
-from canoe.routes import EchoRoute
-from canoe.filters import PassThroughFilter
+from canoe.routes import echo
+from canoe.filters import pass_through
 
 # TODO: need to import stuff in here I'm sure!
 
@@ -25,7 +25,7 @@ class ConfigNode(Node):
                 x.evaluate(env)
 
         watches = [w.evaluate(env) for w in self.watches]
-        return Config(watches)
+        return Config(watches, properties=env)
 
 
 class AssNode(Node):
@@ -55,14 +55,12 @@ class DeclNode(Node):
             for a in self.assignments:
                 a.evaluate(kwargs)
 
-        if self.decl_type == 'filter':
-            klass = find_filter(self.path)
-        elif self.decl_type == 'route':
-            klass = find_route(self.path)
-        else:
-            raise ValueError("Don't know what to do with '%s'" % \
-                                 self.decl_type)
-        return klass(**kwargs)
+        path = 'canoe.%ss.%s' % (self.decl_type, self.path)
+        thing = import_thing(path)
+        if thing.__class__.__name__ == 'function' and \
+                not hasattr(thing, 'factory'):
+            return thing
+        return thing(**kwargs)
 
 
 class WatchNode(Node):
@@ -78,12 +76,12 @@ class WatchNode(Node):
         if self.route:
             eroute = self.route.evaluate(env)
         else:
-            eroute = EchoRoute()
+            eroute = echo
 
         if self.filters:
             efilters = [c.evaluate(env) for c in self.filters]
         else:
-            efilters = [PassThroughChisel()]
+            efilters = [pass_through]
             
         canoe = Canoe(efilters, eroute)
 
@@ -95,7 +93,6 @@ class WatchNode(Node):
 class ValueNode(Node):
     
     def __init__(self, value):
-        print "Creating value node: ", value
         self.value = value
 
     def evaluate(self, env):
@@ -116,22 +113,9 @@ class DerefNode(Node):
                             self.identifier)
 
 
-# TODO: this is crap, and should definitely be smarter, allow for
-# better pluginy infrastructure, etc
-def find_filter(p):
-    if '.' not in p:
-        p = 'canoe.filters.' + p
-    return _import_class(p)
-
-def find_route(p):
-    if '.' not in p:
-        p = 'canoe.routes.' + p
-    return _import_class(p)
-
-def _import_class(p):
+def import_thing(p):
     bits = p.split('.')
     mod = '.'.join(bits[0:-1])
-    cls = bits[-1]
-
-    imod = import_module(mod)
-    return getattr(imod, cls)
+    thing = bits[-1]
+    mod = import_module(mod)
+    return getattr(mod, thing)

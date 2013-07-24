@@ -13,4 +13,4 @@ closure, but if you'd rather think in objects, just override `__call__`.
 """
 
 from canoe.filters.simple import *
-
+from canoe.filters.utils import filter

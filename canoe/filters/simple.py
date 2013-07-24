@@ -1,11 +1,12 @@
 import re
 
+import utils
+
 # TODO: shouldn't be the case that filters are always classes
 
-class PassThroughFilter(object):
-
-    def __call__(self, line, buffer):
-        return (line, buffer)
+@utils.filter
+def pass_through(line, buffer):
+    return (line, buffer)
 
 
 class RegexpFilter(object):
